@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Good Tiffin – Order food from restaurants near you</title>
+<style>
+:root{--bg:#fffaf5;--card:#fff;--ink:#2b1d16;--mut:#7a6a60;--line:#eadfd5;--brand:#e23744;--brand-ink:#fff;--ok:#1f8a4c;--chip:#fff1e6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1410;--card:#261c16;--ink:#f6ece4;--mut:#b8a698;--line:#3a2c23;--chip:#33251c}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;line-height:1.45}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:5;padding:10px 16px}
+.row{display:flex;gap:10px;align-items:center;max-width:1000px;margin:auto}
+.logo{font:800 22px Georgia,serif;color:var(--brand);letter-spacing:-.5px}
+.search{flex:1;min-width:0;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:15px}
+.cartbtn{background:var(--brand);color:var(--brand-ink);border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;white-space:nowrap}
+main{max-width:1000px;margin:auto;padding:16px}
+h1{font:800 clamp(26px,6vw,40px) Georgia,serif;margin:8px 0 4px;letter-spacing:-1px}
+.sub{color:var(--mut);margin:0 0 16px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px}
+button.chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;font-size:14px}
+button.chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;padding:0;color:inherit;font:inherit}
+.card:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.pic{height:130px;display:flex;align-items:center;justify-content:center;font-size:64px}
+.info{padding:12px 14px}
+.info h3{margin:0 0 2px;font-size:17px}
+.meta{color:var(--mut);font-size:13px}
+.rate{display:inline-block;background:var(--ok);color:#fff;font-weight:700;font-size:13px;padding:2px 7px;border-radius:6px;float:right}
+.offer{color:var(--brand);font-weight:700;font-size:13px;margin-top:6px}
+.back{background:none;border:0;color:var(--brand);font-weight:700;cursor:pointer;padding:6px 0;font-size:15px}
+.item{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.item b{display:block}
+.veg{display:inline-block;width:12px;height:12px;border:2px solid var(--ok);border-radius:2px;margin-right:6px;vertical-align:middle;position:relative}
+.veg::after{content:"";position:absolute;inset:2px;background:var(--ok);border-radius:50%}
+.nv{border-color:#b3261e}.nv::after{background:#b3261e}
+.add{border:1px solid var(--brand);background:var(--card);color:var(--brand);font-weight:800;border-radius:8px;padding:7px 18px;cursor:pointer}
+.qty{display:inline-flex;align-items:center;background:var(--brand);color:#fff;border-radius:8px}
+.qty button{background:none;border:0;color:#fff;font-size:18px;padding:5px 12px;cursor:pointer}
+aside{position:fixed;inset:0 0 0 auto;width:min(380px,100%);background:var(--card);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .25s;z-index:10;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column}
+aside.open{transform:none}
+.lines{flex:1;overflow:auto}
+.tot{display:flex;justify-content:space-between;padding:4px 0;color:var(--mut)}
+.tot.big{color:var(--ink);font-weight:800;font-size:18px}
+.empty{text-align:center;color:var(--mut);padding:40px 10px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;z-index:20}
+@media(prefers-reduced-motion:reduce){aside{transition:none}}
+</style>
+</head>
+<body>
+<header><div class="row">
+<span class="logo">good tiffin</span>
+<input class="search" id="q" type="search" placeholder="Search restaurants or dishes" aria-label="Search">
+<button class="cartbtn" id="cartBtn">Cart (0)</button>
+</div></header>
+<main id="main"></main>
+<aside id="cart" aria-label="Cart"></aside>
+<script>
+const R=[
+{id:1,n:"Spice Route",c:"North Indian",e:"🍛",bg:"#ffd9b3",r:4.5,t:30,cost:600,off:"20% off up to ₹100",m:[["Butter Chicken",320,0],["Paneer Tikka Masala",280,1],["Garlic Naan",60,1],["Dal Makhani",240,1]]},
+{id:2,n:"Napoli Slice",c:"Pizza",e:"🍕",bg:"#ffc9c9",r:4.3,t:25,cost:500,off:"Free garlic bread",m:[["Margherita",299,1],["Pepperoni",399,0],["Farmhouse",349,1],["Tiramisu",160,1]]},
+{id:3,n:"Dragon Wok",c:"Chinese",e:"🥡",bg:"#ffe9a8",r:4.1,t:35,cost:450,off:"₹75 off above ₹399",m:[["Veg Hakka Noodles",190,1],["Chilli Chicken",260,0],["Manchurian",210,1],["Spring Rolls",150,1]]},
+{id:4,n:"Burger Barn",c:"Burgers",e:"🍔",bg:"#d4f0c0",r:4.4,t:20,cost:350,off:"Buy 1 get 1",m:[["Classic Veg Burger",129,1],["Chicken Zinger",189,0],["Peri Peri Fries",99,1],["Chocolate Shake",140,1]]},
+{id:5,n:"Biryani House",c:"Biryani",e:"🍚",bg:"#ffd1e3",r:4.6,t:40,cost:550,off:"15% off",m:[["Hyderabadi Chicken Biryani",290,0],["Veg Dum Biryani",230,1],["Mutton Biryani",380,0],["Raita",50,1]]},
+{id:6,n:"Sweet Tooth",c:"Desserts",e:"🍰",bg:"#e3d4ff",r:4.2,t:20,cost:300,off:"Free delivery",m:[["Brownie Sundae",180,1],["Red Velvet Slice",150,1],["Gulab Jamun",90,1],["Cold Coffee",130,1]]},
+{id:7,n:"South Express",c:"South Indian",e:"🥞",bg:"#c9e8ff",r:4.4,t:25,cost:250,off:"₹50 off",m:[["Masala Dosa",110,1],["Idli Sambar",80,1],["Medu Vada",90,1],["Filter Coffee",50,1]]},
+{id:8,n:"Healthy Bowl",c:"Healthy",e:"🥗",bg:"#d6f5e3",r:4.0,t:30,cost:400,off:"10% off",m:[["Greek Salad",220,1],["Grilled Chicken Bowl",320,0],["Quinoa Bowl",280,1],["Green Smoothie",160,1]]}];
+const cats=["All","North Indian","Pizza","Chinese","Burgers","Biryani","Desserts","South Indian","Healthy"];
+let cat="All",qs="",cart={},cur=null,veg=false,sort="rating";
+const $=s=>document.querySelector(s),inr=n=>"₹"+n;
+const count=()=>Object.values(cart).reduce((a,b)=>a+b.q,0);
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1800)}
+function home(){cur=null;
+const l=R.filter(r=>(cat=="All"||r.c==cat)&&(!qs||(r.n+r.c+r.m.map(x=>x[0]).join()).toLowerCase().includes(qs))).sort((a,b)=>sort=="rating"?b.r-a.r:sort=="time"?a.t-b.t:a.cost-b.cost);
+$("#main").innerHTML=`<h1>What are you craving today?</h1><p class="sub">${l.length} restaurants deliver to you</p>
+<div class="chips">${cats.map(c=>`<button class="chip" aria-pressed="${c==cat}" data-c="${c}">${c}</button>`).join("")}</div>
+<div class="chips"><span class="meta" style="align-self:center">Sort:</span>${[["rating","Top rated"],["time","Fastest"],["cost","Lowest cost"]].map(s=>`<button class="chip" aria-pressed="${sort==s[0]}" data-s="${s[0]}">${s[1]}</button>`).join("")}</div>
+<div class="grid">${l.map(r=>`<button class="card" data-r="${r.id}"><div class="pic" style="background:${r.bg}">${r.e}</div><div class="info"><span class="rate">★ ${r.r}</span><h3>${r.n}</h3><div class="meta">${r.c} · ${r.t} min · ${inr(r.cost)} for two</div><div class="offer">${r.off}</div></div></button>`).join("")||'<p class="empty">No matches. Try another dish or cuisine.</p>'}</div>`}
+function menu(id){cur=R.find(r=>r.id==id);const r=cur;
+$("#main").innerHTML=`<button class="back" id="bk">← All restaurants</button><h1>${r.n}</h1><p class="sub">${r.c} · ★ ${r.r} · ${r.t} min · ${r.off}</p>
+<button class="chip" id="vg" aria-pressed="${veg}">Veg only</button>
+${r.m.filter(x=>!veg||x[2]).map((x,i)=>{const k=r.id+"-"+i,q=cart[k]?.q||0;return`<div class="item"><div><span class="veg ${x[2]?"":"nv"}"></span><b style="display:inline">${x[0]}</b><div class="meta">${inr(x[1])}</div></div>${q?`<span class="qty"><button data-d="-1" data-k="${k}" aria-label="Remove one">−</button>${q}<button data-d="1" data-k="${k}" aria-label="Add one">+</button></span>`:`<button class="add" data-k="${k}" data-d="1">Add</button>`}</div>`}).join("")}`}
+function change(k,d){const[ri,i]=k.split("-"),r=R.find(x=>x.id==ri),it=r.m[i];
+if(cart[k]&&Object.values(cart).length&&cart[k].rid!=r.id){}
+const other=Object.values(cart)[0];
+if(!cart[k]&&other&&other.rid!=r.id){cart={};toast("Cart reset for a new restaurant")}
+cart[k]=cart[k]||{n:it[0],p:it[1],q:0,rid:r.id,rn:r.n};cart[k].q+=d;if(cart[k].q<=0)delete cart[k];
+sync();cur?menu(cur.id):0}
+function sync(){$("#cartBtn").textContent=`Cart (${count()})`;drawCart()}
+function drawCart(){const e=Object.entries(cart),sub=e.reduce((a,[,v])=>a+v.p*v.q,0),fee=e.length?(sub>=400?0:40):0,tax=Math.round(sub*.05);
+$("#cart").innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Your order</h2><button class="back" id="cx">Close</button></div>
+<div class="lines">${e.length?`<p class="meta">From ${e[0][1].rn}</p>`+e.map(([k,v])=>`<div class="item"><div><b>${v.n}</b><span class="meta">${inr(v.p*v.q)}</span></div><span class="qty"><button data-ck="${k}" data-d="-1" aria-label="Remove one">−</button>${v.q}<button data-ck="${k}" data-d="1" aria-label="Add one">+</button></span></div>`).join(""):'<p class="empty">Your cart is empty. Add a dish to get started.</p>'}</div>
+${e.length?`<div class="tot"><span>Subtotal</span><span>${inr(sub)}</span></div><div class="tot"><span>Delivery${sub>=400?" (free above ₹400)":""}</span><span>${inr(fee)}</span></div><div class="tot"><span>Taxes</span><span>${inr(tax)}</span></div><div class="tot big"><span>Total</span><span>${inr(sub+fee+tax)}</span></div><button class="cartbtn" id="po" style="width:100%;margin-top:10px;padding:14px">Place order</button>`:""}`}
+document.addEventListener("click",ev=>{const t=ev.target.closest("button");if(!t)return;
+if(t.id=="cartBtn")$("#cart").classList.add("open");
+else if(t.id=="cx")$("#cart").classList.remove("open");
+else if(t.id=="bk")home();
+else if(t.id=="vg"){veg=!veg;menu(cur.id)}
+else if(t.id=="po"){cart={};sync();$("#cart").classList.remove("open");toast("Order placed! Arriving in about 30 min");cur?menu(cur.id):home()}
+else if(t.dataset.ck)change(t.dataset.ck,+t.dataset.d);
+else if(t.dataset.k)change(t.dataset.k,+t.dataset.d);
+else if(t.dataset.r)menu(t.dataset.r);
+else if(t.dataset.c){cat=t.dataset.c;home()}
+else if(t.dataset.s){sort=t.dataset.s;home()}});
+$("#q").addEventListener("input",e=>{qs=e.target.value.trim().toLowerCase();home()});
+home();drawCart();
+</script>
+</body>
+</html>
